@@ -32,7 +32,7 @@ class MyAccountManager(BaseUserManager):
 
 class Account(AbstractBaseUser):
     email        = models.EmailField(unique=True)
-    username     = models.CharField(max_length=40,unique=True,verbose_name='username')
+    username     = models.CharField(max_length=40,unique=True,null=True,blank=True)
     password     = models.CharField(max_length=128)
     date_joined  = models.DateTimeField(auto_now_add=True)
     last_login   = models.DateTimeField(auto_now=True)
