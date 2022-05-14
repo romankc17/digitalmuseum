@@ -1,13 +1,35 @@
-from unicodedata import category
+from unicodedata import category, name
 from rest_framework import serializers
 
-from .models import Blog, Image, Category
+from .models import Blog, Image, Category, Comment, Like
 
 
 class ImageSerializer(serializers.ModelSerializer):
     class Meta:
         model = Image
         fields = ('image',)
+
+
+"""
+Serailizer for the Comment model
+"""
+class CommentSerializer(serializers.ModelSerializer):
+    commented_by = serializers.ReadOnlyField(source='account.name')
+    class Meta:
+        model = Comment
+        fields = ('comment', 'commented_at', 'commented_by')
+
+        read_only_fields = ('commented_at', 'commented_by')
+
+
+"""
+Serializer for the Likes model
+"""
+class LikeSerializer(serializers.ModelSerializer):
+    name = serializers.ReadOnlyField(source='account.name')
+    class Meta:
+        model = Like
+        fields = ('name', 'liked_at')
 
 
 """
@@ -20,10 +42,12 @@ class BlogListSerializer(serializers.ModelSerializer):
     comment_count = serializers.ReadOnlyField(source='comment_set.count')
     like_count = serializers.ReadOnlyField(source='like_set.count')
     category = serializers.CharField(source='category.name')
+    
     class Meta:
         model = Blog
         fields = (
             'id',
+            'slug',
             'category',
             'title', 
             'author', 
@@ -34,11 +58,50 @@ class BlogListSerializer(serializers.ModelSerializer):
             'comment_count',
             'like_count',
         )
-        read_only_fields = ('id', 'pub_date')
+        
+
+"""
+Serializer for the detail view of the Blog model
+"""
+class BlogDetailSerializer(BlogListSerializer):
+    images = ImageSerializer(many=True, required=False)
+    author = serializers.ReadOnlyField(source='author.name')
+    comment_count = serializers.ReadOnlyField(source='comment_set.count')
+    like_count = serializers.ReadOnlyField(source='like_set.count')
+    category = serializers.CharField(source='category.name')
+    comments = CommentSerializer(many=True, required=False)
+    # likes = LikeSerializer(many=True, required=False)
+
+    class Meta:
+        model = Blog
+        fields = (
+            'id',
+            'slug',
+            'category',
+            'title', 
+            'author', 
+            'pub_date', 
+            'body', 
+            'images',
+            'author',
+            'comment_count',
+            'like_count',
+            'comments',
+            # 'likes',
+        )
+        read_only_fields = ('id', 'pub_date','comment_count','like_count','comments')
+
+    def validate_category(self, value):
+        try:
+            Category.objects.get(name=value)
+        except Category.DoesNotExist:
+            raise serializers.ValidationError('Category does not exist')
+        return value
+
 
     def create(self, validated_data):
         # poping the images data from the request data
-        images_data = self.context['request'].data.pop('images')
+
         # poping the category data from the validated data
         category = validated_data.pop('category')['name']
 
@@ -48,17 +111,25 @@ class BlogListSerializer(serializers.ModelSerializer):
         blog.save()
 
         # adding images to the blog
-        for image_data in images_data:
-            print(image_data)
-            Image.objects.create(blog=blog, image=image_data)
+        
+        if 'images' in self.context['request'].data:
+            images_data = self.context['request'].data.pop('images')
+            for image_data in images_data:
+                print(image_data)
+                Image.objects.create(blog=blog, image=image_data)
+                
         return blog
 
+
     def update(self, instance, validated_data):
-        images_data = validated_data.pop('images')
+        images_data = self.context['request'].data.pop('images')
         instance.title = validated_data.get('title', instance.title)
         instance.body = validated_data.get('body', instance.body)
+
+        category = validated_data.get('category', instance.category)['name']
+        instance.category = Category.objects.get(name=category)
+
         instance.save()
         for image_data in images_data:
             Image.objects.update_or_create(blog=instance, image = image_data)
         return instance
-
