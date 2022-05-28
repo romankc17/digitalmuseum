@@ -39,8 +39,8 @@ class BlogListSerializer(serializers.ModelSerializer):
     # adding image field to the serializer
     images = ImageSerializer(many=True, required=False)
     author = serializers.ReadOnlyField(source='author.name')
-    comment_count = serializers.ReadOnlyField(source='comment_set.count')
-    like_count = serializers.ReadOnlyField(source='like_set.count')
+    comment_count = serializers.ReadOnlyField(source='comments.count')
+    like_count = serializers.ReadOnlyField(source='likes.count')
     category = serializers.CharField(source='category.name')
     
     class Meta:
@@ -66,8 +66,8 @@ Serializer for the detail view of the Blog model
 class BlogDetailSerializer(BlogListSerializer):
     images = ImageSerializer(many=True, required=False)
     author = serializers.ReadOnlyField(source='author.name')
-    comment_count = serializers.ReadOnlyField(source='comment_set.count')
-    like_count = serializers.ReadOnlyField(source='like_set.count')
+    comment_count = serializers.ReadOnlyField(source='comments.count')
+    like_count = serializers.ReadOnlyField(source='likes.count')
     category = serializers.CharField(source='category.name')
     comments = CommentSerializer(many=True, required=False)
     # likes = LikeSerializer(many=True, required=False)

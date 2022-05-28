@@ -1,5 +1,6 @@
 from multiprocessing import context
 from unicodedata import category
+from urllib import response
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
@@ -12,20 +13,32 @@ from .serializers import BlogListSerializer, BlogDetailSerializer, CommentSerial
 from .paginations import CustomLimitOffsetPagination
 
 
-class BlogListView(ListAPIView):
-    queryset = Blog.objects.all()
-    serializer_class = BlogListSerializer
-    pagination_class = CustomLimitOffsetPagination
-    permission_classes = (AllowAny,)
+class BlogListView(APIView, CustomLimitOffsetPagination):
+    # queryset = Blog.objects.all()
+    # serializer_class = BlogListSerializer
+    # pagination_class = CustomLimitOffsetPagination
+    # permission_classes = (AllowAny,)
 
     # customizing the queryset to get the parameters from the url
-    def get_queryset(self):
-        queryset = super().get_queryset()
-        category = self.request.query_params.get('category', None)
-        print(category)
+    # def get_queryset(self):
+    #     queryset = super().get_queryset()
+    #     category = self.request.query_params.get('category', None)
+    #     print(category)
+    #     if category:
+    #         queryset = queryset.filter(category__name=category)
+    #     return queryset
+
+    def get(self, request, *args, **kwargs):
+        category = request.query_params.get('category', None)
         if category:
-            queryset = queryset.filter(category__name=category)
-        return queryset
+            blogs = Blog.objects.filter(category__name=category)
+        else:
+            blogs = Blog.objects.all()
+        blog_page = self.paginate_queryset(blogs, request, view=self)
+        serializer = BlogListSerializer(blog_page, many=True)
+        
+        return self.get_paginated_response(serializer.data)
+
 
 
 class BlogCreateView(APIView):
