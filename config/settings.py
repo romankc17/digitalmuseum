@@ -52,7 +52,7 @@ MIDDLEWARE = [
     'django.contrib.sessions.middleware.SessionMiddleware',
 
     # whitenoise middleware    
-    'whitenoise.middleware.WhiteNoiseMiddleware'
+    'whitenoise.middleware.WhiteNoiseMiddleware',
 
     # adding middleware class for cross origin resource sharing (CORS)
     "corsheaders.middleware.CorsMiddleware",
