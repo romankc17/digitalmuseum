@@ -25,7 +25,7 @@ SECRET_KEY = 'c_4u#n+#zdf+7*86dmovs1nb&=3s#g9=$^=u5o5t9)7b2y34g='
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['*']
 
 
 # Application definition
@@ -90,6 +90,11 @@ DATABASES = {
         'NAME': BASE_DIR / 'db.sqlite3',
     }
 }
+
+# Adding for the heroku
+import dj_database_url
+db_from_env = dj_database_url.config()
+DATABASES['default'].update(db_from_env)
 
 
 # Password validation
