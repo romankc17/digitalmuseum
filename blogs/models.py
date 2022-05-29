@@ -2,10 +2,12 @@ from django.db import models
 from django.utils.text import slugify
 from django.dispatch import receiver
 from django.db.models.signals import post_save
+
 from cloudinary.models import CloudinaryField
 
 from .utils import unique_slug_generator
 from accounts.models import Account
+
 
 
 class Category(models.Model):
@@ -43,11 +45,14 @@ class Blog(models.Model):
 class Image(models.Model):
     blog = models.ForeignKey(Blog, on_delete=models.CASCADE, related_name='images')
     # image = models.ImageField(upload_to='images/', null=True, blank=True)
-    image = CloudinaryField('image',null=True,blank=True,
+    image = CloudinaryField(
+        'image',
         transformation=[
             {'width': 350, 'crop': "scale"},
             {'fetch_format': "auto"}
-            ])
+        ],
+        null=True,blank=True,
+    )
 
     def __str__(self):
         return self.image.__str__()

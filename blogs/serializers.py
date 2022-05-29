@@ -5,9 +5,13 @@ from .models import Blog, Image, Category, Comment, Like
 
 
 class ImageSerializer(serializers.ModelSerializer):
+    image_url = serializers.SerializerMethodField()
     class Meta:
         model = Image
-        fields = ('image',)
+        fields = ('image_url',)
+
+    def get_image_url(self, obj):
+        return obj.image.url
 
 
 """

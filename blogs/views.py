@@ -1,32 +1,25 @@
-from multiprocessing import context
-from unicodedata import category
-from urllib import response
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
-from rest_framework.generics import ListAPIView
 from rest_framework.permissions import IsAuthenticated, AllowAny
 from rest_framework.exceptions import AuthenticationFailed
+from rest_framework import permissions
 
 from .models import Blog, Category, Comment, Like
 from .serializers import BlogListSerializer, BlogDetailSerializer, CommentSerializer
 from .paginations import CustomLimitOffsetPagination
 
+# Customizing the permissions model
+SAFE_METHODS = ['GET', 'HEAD', 'OPTIONS']
+
+class IsAuthenticatedOrReadOnly(permissions.BasePermission):
+    def has_permission(self, request, view):
+        if request.method in SAFE_METHODS:
+            return True
+        return request.user.is_authenticated
 
 class BlogListView(APIView, CustomLimitOffsetPagination):
-    # queryset = Blog.objects.all()
-    # serializer_class = BlogListSerializer
-    # pagination_class = CustomLimitOffsetPagination
-    # permission_classes = (AllowAny,)
-
-    # customizing the queryset to get the parameters from the url
-    # def get_queryset(self):
-    #     queryset = super().get_queryset()
-    #     category = self.request.query_params.get('category', None)
-    #     print(category)
-    #     if category:
-    #         queryset = queryset.filter(category__name=category)
-    #     return queryset
+    permission_classes = (IsAuthenticatedOrReadOnly,)
 
     def get(self, request, *args, **kwargs):
         category = request.query_params.get('category', None)
@@ -39,12 +32,7 @@ class BlogListView(APIView, CustomLimitOffsetPagination):
         
         return self.get_paginated_response(serializer.data)
 
-
-
-class BlogCreateView(APIView):
-
     def post(self, request):
-        print(request.data)
         serializer = BlogDetailSerializer(data=request.data, context={'request': request})
         if serializer.is_valid():
             serializer.save(author=request.user)
@@ -55,33 +43,29 @@ class BlogCreateView(APIView):
 
 
 class BlogDetailView(APIView):
-    permission_classes = (AllowAny,)
+    permission_classes = (IsAuthenticatedOrReadOnly,)
 
-    def get(self, request, slug):
-        # getting the blog instance from the slug
+    def get(self, request, blog_id):
+        # getting the blog instance from the blog_id
         # if the blog is not found, raise an exception
         try:
-            blog = Blog.objects.get(slug=slug)
+            blog = Blog.objects.get(id=blog_id)
         except Blog.DoesNotExist:
             return Response(
-                {'error': 'Blog with slug {} does not exist'.format(slug)},
+                {'error': 'Blog with blog_id {} does not exist'.format(blog_id)},
                 status=status.HTTP_404_NOT_FOUND)
         serializer = BlogDetailSerializer(blog, context={'request': request})
         return Response(serializer.data)
 
-
-class BlogUpdateView(APIView):
-    permission_classes = (IsAuthenticated,)
-
-    # view to update the blog
-    def put(self, request, slug):
-        # getting the blog from the slug
+        # view to update the blog
+    def put(self, request, blog_id):
+        # getting the blog from the blog_id
         # raising an exception if the blog does not exist
         try:
-            blog = Blog.objects.get(slug=slug)
+            blog = Blog.objects.get(id=blog_id)
         except Blog.DoesNotExist:
             return Response(
-                {'error': 'Blog with slug {} does not exist'.format(slug)},
+                {'error': 'Blog with blog_id {} does not exist'.format(blog_id)},
                 status=status.HTTP_404_NOT_FOUND)
         
         # checking if the user is the author of the blog
@@ -100,12 +84,12 @@ class BlogUpdateView(APIView):
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
     # view for deleting the blog
-    def delete(self, request, slug):
+    def delete(self, request, blog_id):
         try:
-            blog = Blog.objects.get(slug=slug)
+            blog = Blog.objects.get(id=blog_id)
         except Blog.DoesNotExist:
             return Response(
-                {'error': 'Blog with slug {} does not exist'.format(slug)},
+                {'error': 'Blog with blog_id {} does not exist'.format(blog_id)},
                 status=status.HTTP_404_NOT_FOUND)
 
         # checking if the user is the author of the blog
@@ -114,21 +98,23 @@ class BlogUpdateView(APIView):
         else:
             raise AuthenticationFailed('You are not the author of the blog')
         return Response(
-            {'message': 'Blog " {} " has been deleted'.format(blog.title)},
+            {'message': f'Blog "{blog.title}" has been deleted'},
             status=status.HTTP_204_NO_CONTENT
             )
+
+
 
 class BlogLikeView(APIView):
     permission_classes = (IsAuthenticated,)
 
-    def post(self, request, slug):
-        # getting the blog from the slug
+    def post(self, request, blog_id):
+        # getting the blog from the blog_id
         # raising an exception if the blog does not exist
         try:
-            blog = Blog.objects.get(slug=slug)
+            blog = Blog.objects.get(id=blog_id)
         except Blog.DoesNotExist:
             return Response(
-                {'error': 'Blog with slug {} does not exist'.format(slug)},
+                {'error': 'Blog with blog_id {} does not exist'.format(blog_id)},
                 status=status.HTTP_404_NOT_FOUND)
 
         # checking if the user has already liked the blog
@@ -151,14 +137,14 @@ class BlogLikeView(APIView):
 class BlogCommentView(APIView):
     permission_classes = (IsAuthenticated,)
 
-    def post(self, request, slug):
-        # getting the blog from the slug
+    def post(self, request, blog_id):
+        # getting the blog from the blog_id
         # raising an exception if the blog does not exist
         try:
-            blog = Blog.objects.get(slug=slug)
+            blog = Blog.objects.get(id=blog_id)
         except Blog.DoesNotExist:
             return Response(
-                {'error': 'Blog with slug {} does not exist'.format(slug)},
+                {'error': 'Blog with blog_id {} does not exist'.format(blog_id)},
                 status=status.HTTP_404_NOT_FOUND)
 
         # passing the request.data to the serializer
