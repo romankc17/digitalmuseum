@@ -24,7 +24,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # See https://docs.djangoproject.com/en/3.1/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = os.environ['SECRET_KEY']
+SECRET_KEY = "c_4u#n+#zdf+7*86dmovs1nb&=3s#g9=$^=u5o5t9)7b2y34g="
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
@@ -198,12 +198,12 @@ SIMPLE_JWT = {
 
 CORS_ALLOW_ALL_ORIGINS = True
 
-CLOUDINARY_STORAGE = {
-    'CLOUD_NAME': os.environ['CLOUDINARY_CLOUD_NAME'],
-    'API_KEY': os.environ['CLOUDINARY_API_KEY'],
-    'API_SECRET': os.environ['CLOUDINARY_API_SECRET'],
-}
+cloudinary.config( 
+  cloud_name = 'het1cbxpi', 
+  api_key ='156172626674533',
+  api_secret = 'F_9LvZl-rVBPo3VL4mg9L3DiOFY'
+)
 
 DEFAULT_FILE_STORAGE = 'cloudinary_storage.storage.MediaCloudinaryStorage'
 
-CSRF_TRUSTED_ORIGINS = ['*']
+CSRF_TRUSTED_ORIGINS = ['http://localhost:3000', 'https://digitalmuseum.herokuapp.com/']
