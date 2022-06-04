@@ -4,9 +4,10 @@ from rest_framework import status
 from rest_framework.permissions import IsAuthenticated, AllowAny
 from rest_framework.exceptions import AuthenticationFailed
 from rest_framework import permissions
+from rest_framework import viewsets
 
 from .models import Blog, Category, Comment, Like
-from .serializers import BlogListSerializer, BlogDetailSerializer, CommentSerializer
+from .serializers import BlogListSerializer, BlogDetailSerializer, CommentSerializer, CategorySerializer
 from .paginations import CustomLimitOffsetPagination
 
 # Customizing the permissions model
@@ -17,6 +18,17 @@ class IsAuthenticatedOrReadOnly(permissions.BasePermission):
         if request.method in SAFE_METHODS:
             return True
         return request.user.is_authenticated
+
+class IsAdminOrReadOnly(permissions.BasePermission):
+    def has_permission(self, request, view):
+        if request.method in SAFE_METHODS:
+            return True
+        return request.user.is_staff
+
+class CategoryViewSet(viewsets.ModelViewSet):
+    queryset = Category.objects.all()
+    serializer_class = CategorySerializer
+    permission_classes = [IsAdminOrReadOnly]
 
 class BlogListView(APIView, CustomLimitOffsetPagination):
     permission_classes = (IsAuthenticatedOrReadOnly,)
@@ -45,27 +57,27 @@ class BlogListView(APIView, CustomLimitOffsetPagination):
 class BlogDetailView(APIView):
     permission_classes = (IsAuthenticatedOrReadOnly,)
 
-    def get(self, request, blog_id):
-        # getting the blog instance from the blog_id
+    def get(self, request, slug):
+        # getting the blog instance from the slug
         # if the blog is not found, raise an exception
         try:
-            blog = Blog.objects.get(id=blog_id)
+            blog = Blog.objects.get(slug=slug)
         except Blog.DoesNotExist:
             return Response(
-                {'error': 'Blog with blog_id {} does not exist'.format(blog_id)},
+                {'error': 'Blog with slug {} does not exist'.format(slug)},
                 status=status.HTTP_404_NOT_FOUND)
         serializer = BlogDetailSerializer(blog, context={'request': request})
         return Response(serializer.data)
 
         # view to update the blog
-    def put(self, request, blog_id):
-        # getting the blog from the blog_id
+    def put(self, request, slug):
+        # getting the blog from the slug
         # raising an exception if the blog does not exist
         try:
-            blog = Blog.objects.get(id=blog_id)
+            blog = Blog.objects.get(slug=slug)
         except Blog.DoesNotExist:
             return Response(
-                {'error': 'Blog with blog_id {} does not exist'.format(blog_id)},
+                {'error': 'Blog with slug {} does not exist'.format(slug)},
                 status=status.HTTP_404_NOT_FOUND)
         
         # checking if the user is the author of the blog
@@ -84,12 +96,12 @@ class BlogDetailView(APIView):
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
     # view for deleting the blog
-    def delete(self, request, blog_id):
+    def delete(self, request, slug):
         try:
-            blog = Blog.objects.get(id=blog_id)
+            blog = Blog.objects.get(slug=slug)
         except Blog.DoesNotExist:
             return Response(
-                {'error': 'Blog with blog_id {} does not exist'.format(blog_id)},
+                {'error': 'Blog with slug {} does not exist'.format(slug)},
                 status=status.HTTP_404_NOT_FOUND)
 
         # checking if the user is the author of the blog
@@ -107,14 +119,14 @@ class BlogDetailView(APIView):
 class BlogLikeView(APIView):
     permission_classes = (IsAuthenticated,)
 
-    def post(self, request, blog_id):
-        # getting the blog from the blog_id
+    def post(self, request, slug):
+        # getting the blog from the slug
         # raising an exception if the blog does not exist
         try:
-            blog = Blog.objects.get(id=blog_id)
+            blog = Blog.objects.get(slug=slug)
         except Blog.DoesNotExist:
             return Response(
-                {'error': 'Blog with blog_id {} does not exist'.format(blog_id)},
+                {'error': 'Blog with slug {} does not exist'.format(slug)},
                 status=status.HTTP_404_NOT_FOUND)
 
         # checking if the user has already liked the blog
@@ -137,14 +149,14 @@ class BlogLikeView(APIView):
 class BlogCommentView(APIView):
     permission_classes = (IsAuthenticated,)
 
-    def post(self, request, blog_id):
-        # getting the blog from the blog_id
+    def post(self, request, slug):
+        # getting the blog from the slug
         # raising an exception if the blog does not exist
         try:
-            blog = Blog.objects.get(id=blog_id)
+            blog = Blog.objects.get(slug=slug)
         except Blog.DoesNotExist:
             return Response(
-                {'error': 'Blog with blog_id {} does not exist'.format(blog_id)},
+                {'error': 'Blog with slug {} does not exist'.format(slug)},
                 status=status.HTTP_404_NOT_FOUND)
 
         # passing the request.data to the serializer
