@@ -1,3 +1,4 @@
+import optparse
 from django.db import models
 from django.contrib.auth.models import AbstractBaseUser, BaseUserManager
 
@@ -42,6 +43,8 @@ class Account(AbstractBaseUser):
     is_superuser = models.BooleanField(default=False)
     
     name = models.CharField(max_length=40, blank=True)
+    phone = models.CharField(max_length=10, blank=True)
+    otp = models.CharField(max_length=6,null=True,blank=True)
     
     USERNAME_FIELD = 'email'
     REQUIRED_FIELDS = ['username',]

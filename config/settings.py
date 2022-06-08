@@ -47,7 +47,8 @@ INSTALLED_APPS = [
     
     'rest_framework',
     'corsheaders',
-    'cloudinary'
+    'cloudinary',
+    'drf_yasg',
 
 ]
 
@@ -207,3 +208,14 @@ cloudinary.config(
 DEFAULT_FILE_STORAGE = 'cloudinary_storage.storage.MediaCloudinaryStorage'
 
 CSRF_TRUSTED_ORIGINS = ['http://localhost:3000', 'https://digitalmuseum.herokuapp.com/']
+
+
+
+EMAIL_USE_SSL = True
+EMAIL_HOST = 'mail.yatharup.com'
+EMAIL_PORT = 465
+EMAIL_HOST_USER = 'noreply@yatharup.com'
+EMAIL_HOST_PASSWORD = 'Dntemerom@17'
+DEFAULT_FROM_EMAIL = 'noreply@yatharup.com'
+
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
