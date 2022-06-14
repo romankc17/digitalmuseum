@@ -44,7 +44,7 @@ class UserChangeForm(forms.ModelForm):
 
     class Meta:
         model = Account
-        fields = ('email', 'password',  'is_active', 'is_admin')
+        fields = ('username','email', 'password',  'is_active', 'is_admin','phone','address')
 
 
 class UserAdmin(BaseUserAdmin):
@@ -55,10 +55,10 @@ class UserAdmin(BaseUserAdmin):
     # The fields to be used in displaying the User model.
     # These override the definitions on the base UserAdmin
     # that reference specific fields on auth.User.
-    list_display = ('name','email','date_joined')
+    list_display = ('username','email','date_joined')
     list_filter = ('is_admin','is_active')
     fieldsets = (
-        (None, {'fields': ('email', 'password', 'name',)}),
+        (None, {'fields': ('username','email', 'password', 'name','phone','address')}),
         # ('Personal info', {'fields': ('date_of_birth',)}),
         ('Permissions', {'fields': ('is_admin','is_active')}),
     )
@@ -67,7 +67,7 @@ class UserAdmin(BaseUserAdmin):
     add_fieldsets = (
         (None, {
             'classes': ('wide',),
-            'fields': ('name','email', 'password1', 'password2'),
+            'fields': ('name','email', 'password1', 'password2','username','phone','address'),
         }),
     )
     search_fields = ('email',)

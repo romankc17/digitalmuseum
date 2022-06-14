@@ -18,6 +18,7 @@ class CustomTokenObtainPairSerializer(TokenObtainPairSerializer):
 
 class AccountSerializer(serializers.ModelSerializer):
     password = serializers.CharField(write_only=True)
+    is_active = serializers.BooleanField(read_only=True)
     class Meta:
         model = Account
         fields = (
@@ -27,7 +28,9 @@ class AccountSerializer(serializers.ModelSerializer):
             'password', 
             'name', 
             'phone',
-            'date_joined'
+            'date_joined',
+            'is_active',
+            'address',
         )
         extra_kwargs = {'password': {'write_only': True}}
         
@@ -39,9 +42,20 @@ class AccountSerializer(serializers.ModelSerializer):
         instance.is_active = False
         instance.save()
         return instance
+        
+
+class AccountUpdateSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Account
+        fields = (
+            'username', 
+            'name', 
+            'phone',
+            'address',
+        )
 
 
-class VerifyAccountSerializer(serializers.Serializer):
+class VerifyOTPSerializer(serializers.Serializer):
     email = serializers.EmailField()
     otp = serializers.CharField()
     

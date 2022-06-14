@@ -35,14 +35,27 @@ class BlogListView(APIView, CustomLimitOffsetPagination):
 
     def get(self, request, *args, **kwargs):
         category = request.query_params.get('category', None)
-        if category:
-            blogs = Blog.objects.filter(category__name=category)
+        username = request.query_params.get('username', None)
+        if category and username:
+            queryset = Blog.objects.filter(category__name=category, author__username=username)
+        elif category:
+            queryset = Blog.objects.filter(category__name=category)
+        elif username:
+            queryset = Blog.objects.filter(author__username=username)
         else:
-            blogs = Blog.objects.all()
-        blog_page = self.paginate_queryset(blogs, request, view=self)
-        serializer = BlogListSerializer(blog_page, many=True)
-        
+            queryset = Blog.objects.all()
+        blogs = self.paginate_queryset(queryset, request, view=self)
+        serializer = BlogListSerializer(blogs, many=True, context={'request': request})
         return self.get_paginated_response(serializer.data)
+
+        # if category:
+        #     blogs = Blog.objects.filter(category__name=category)
+        # else:
+        #     blogs = Blog.objects.all()
+        # blog_page = self.paginate_queryset(blogs, request, view=self)
+        # serializer = BlogListSerializer(blog_page, many=True)
+        
+        # return self.get_paginated_response(serializer.data)
 
     def post(self, request):
         serializer = BlogDetailSerializer(data=request.data, context={'request': request})
