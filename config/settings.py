@@ -74,8 +74,8 @@ WSGI_APPLICATION = 'config.wsgi.application'
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.mysql',
-        'NAME': 'yatharup_digitalmuseum',
+        'ENGINE': 'mysql.connector.django',
+        'NAME': 'yatharup_digital_museum',
         'USER': os.environ.get('DB_USER'),
         'PASSWORD': os.environ.get('DB_PASSWORD'),
         'HOST': 'localhost',
