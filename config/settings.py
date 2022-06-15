@@ -24,10 +24,10 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # See https://docs.djangoproject.com/en/3.1/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = "c_4u#n+#zdf+7*86dmovs1nb&=3s#g9=$^=u5o5t9)7b2y34g="
+SECRET_KEY = os.environ.get('SECRET_KEY')
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = False
 
 ALLOWED_HOSTS = ['*']
 
@@ -95,8 +95,12 @@ WSGI_APPLICATION = 'config.wsgi.application'
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
+        'ENGINE': 'django.db.backends.mysql',
+        'NAME': 'yatharup_digitalmuseum',
+        'USER': 'yatharup_admin',
+        'PASSWORD': 'Dntemerom@17',
+        'HOST': 'localhost',
+        'PORT': '3306',
     }
 }
 
@@ -143,9 +147,6 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/3.1/howto/static-files/
 
 STATIC_URL = '/static/'
-STATICFILES_DIRS = (
-    os.path.join(BASE_DIR, "static"),
-)
 STATIC_ROOT = os.path.join(BASE_DIR, "staticfiles")
 
 STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
@@ -219,3 +220,8 @@ EMAIL_HOST_PASSWORD = 'Dntemerom@17'
 DEFAULT_FROM_EMAIL = 'noreply@yatharup.com'
 
 EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+
+
+# Override production variables if DJANGO_DEVELOPMENT env variable is set
+if os.environ.get('DJANGO_DEVELOPMENT','true'):
+    from .settings_dev import *
