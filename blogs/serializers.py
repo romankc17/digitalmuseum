@@ -15,7 +15,9 @@ class ImageSerializer(serializers.ModelSerializer):
         fields = ('image_url',)
 
     def get_image_url(self, obj):
-        return obj.image.url
+        request = self.context.get('request')
+        photo_url = obj.image.url
+        return request.build_absolute_uri(photo_url)
 
 
 """
