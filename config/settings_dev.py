@@ -7,7 +7,7 @@ load_dotenv()
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 ALLOWED_HOSTS = ["*"]
-DEBUG = True
+DEBUG = False
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.sqlite3',
