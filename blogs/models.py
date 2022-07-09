@@ -2,10 +2,12 @@ from django.db import models
 from django.utils.text import slugify
 from django.dispatch import receiver
 from django.db.models.signals import post_save
+from django.utils import timezone
+
+from PIL import Image as PILImage
 
 from .utils import unique_slug_generator
 from accounts.models import Account
-
 
 
 class Category(models.Model):
@@ -13,6 +15,7 @@ class Category(models.Model):
     slug = models.SlugField(max_length=255, unique=True, null=True, blank=True)
     description = models.TextField(blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
+    modified_at = models.DateTimeField(auto_now_add=True,null=True,blank=True)
 
     # customize save method to automatically create slug
     def save(self, *args, **kwargs):
@@ -21,6 +24,10 @@ class Category(models.Model):
 
     def __str__(self):
         return self.name
+
+    class Meta:
+        verbose_name_plural = 'Categories'
+        ordering = ['-modified_at', '-created_at']
 
 
 
@@ -38,7 +45,11 @@ class Blog(models.Model):
 
     def __str__(self):
         return self.title
-        
+
+@receiver(post_save, sender=Blog)
+def add_modified_date_to_category(sender, instance, **kwargs):
+    instance.category.modified_at = timezone.now()
+    instance.category.save()
 
 class Image(models.Model):
     blog = models.ForeignKey(Blog, on_delete=models.CASCADE, related_name='images')
@@ -46,6 +57,19 @@ class Image(models.Model):
     
     def __str__(self):
         return self.image.__str__()
+
+    # compress image when saving
+    def save(self, *args, **kwargs):
+        super(Image, self).save(*args, **kwargs)
+
+        img = PILImage.open(self.image.path)
+        height, width = img.size
+
+        img = img.resize((width//2, height//2), PILImage.ANTIALIAS)
+        img.save(self.image.path, optimize=True, quality=95)
+        print(img.size)
+
+
 
 
 # Model for the post comments
