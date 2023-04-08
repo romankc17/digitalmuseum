@@ -5,8 +5,11 @@ from accounts.models import Account
 
 
 class CustomTokenObtainPairSerializer(TokenObtainPairSerializer):
-    def validate(self,attr):
-        data = super().validate(attr)
+    
+    def validate(self,attrs):
+        
+        data = super().validate(attrs)
+        
         refresh = self.get_token(self.user)
         data['refresh'] = str(refresh)
         data['access'] = str(refresh.access_token)
@@ -15,7 +18,7 @@ class CustomTokenObtainPairSerializer(TokenObtainPairSerializer):
         data['email'] = self.user.email
 
         return data
-
+    
 class AccountSerializer(serializers.ModelSerializer):
     password = serializers.CharField(write_only=True)
     is_active = serializers.BooleanField(read_only=True)
