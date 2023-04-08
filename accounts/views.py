@@ -29,11 +29,11 @@ class RegisterView(APIView):
 
         account = serializer.instance        
 
-        otp = random.randint(100000, 999999) 
+        # otp = random.randint(100000, 999999) 
         
-        # Send otp to email
-        Util.send_otp_vai_email(otp,account.email)
-        account.otp = otp
+        # # Send otp to email
+        # Util.send_otp_vai_email(otp,account.email)
+        # account.otp = otp
         account.save()
 
         

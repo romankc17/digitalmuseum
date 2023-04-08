@@ -6,7 +6,7 @@ load_dotenv()
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-SECRET_KEY = os.getenv('SECRET_KEY')
+SECRET_KEY = 'a*_*zY9X$0c%5f5+f5@5j5qn5*5%5w5=5z5q5q5^5h5g5a5j5n5v5t5#5#5n5t5n5t5v5^5b5g5h5n5a'
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
@@ -189,5 +189,5 @@ EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
 
 
 # Override production variables if DJANGO_DEVELOPMENT env variable is set
-if os.getenv('DJANGO_DEVELOPMENT_MODE'):
-    from .settings_dev import *
+# if os.getenv('DJANGO_DEVELOPMENT_MODE'):
+from .settings_dev import *
