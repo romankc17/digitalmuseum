@@ -4,8 +4,8 @@ This is a Django Rest Framework project that allows users to upload images of di
 ## Installation
 * Clone the repository ```git clone https://github.com/romankc/digitalmuseum.git```
 * Navigate to the project directory ```cd digitalmuseum```
-* Create a virtual environment and activate it ```python -m venv env
-source env/bin/activate```
+* Create a virtual environment and activate it ```python -m venv env```
+ ```source env/bin/activate```
 * Install the project dependencies ``` pip install -r requirements.txt ```
 * Setup the database ```python manage.py migrate```
 * Create a superuser ```python manage.py createsuperuser```
